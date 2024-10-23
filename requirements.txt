@@ -1,0 +1,6 @@
+time
+pandas
+selenium.webdriver
+selenium.webdriver.common.by.By
+selenium.webdriver.chrome.service.Service
+selenium.webdriver.chrome.options.Options

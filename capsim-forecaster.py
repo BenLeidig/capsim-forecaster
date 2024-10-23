@@ -7,12 +7,12 @@ Created on Tue Oct 22 14:21:38 2024
 """
 
 # imports
+import time
 import pandas as pd
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-import time
 
 # creating empty lists
 products = []
