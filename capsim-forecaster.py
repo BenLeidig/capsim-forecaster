@@ -44,7 +44,7 @@ def find_potential_market_share(num):
         for row in rows:
             product_td = row.find_element(By.XPATH, 'td[1]')
             product = product_td.text
-            if product == target_product:
+            if product.lower() == target_product:
                 value_td = row.find_element(By.XPATH, f'td[{num + 2}]')
                 value = value_td.text
                 potential_market_share = float(value.replace('%', '').replace('.', '').replace(' ', ''))*0.001
@@ -60,7 +60,7 @@ def find_product_satisfaction(num):
         for row in rows:
             product_td = row.find_element(By.XPATH, 'td[1]')
             product = product_td.text
-            if product == target_product:
+            if product.lower() == target_product:
                 value_td = row.find_element(By.XPATH, 'td[15]')
                 product_satisfaction = value_td.text.replace(' ', '')
                 return int(product_satisfaction)
@@ -90,7 +90,7 @@ def find_units_sold(num):
         for row in rows:
             product_td = row.find_element(By.XPATH, 'td[1]')
             product = product_td.text.replace(',', '').replace(' ', '')
-            if product == target_product:
+            if product.lower() == target_product:
                 value_td = row.find_element(By.XPATH, 'td[3]')
                 units_sold = value_td.text.replace(',', '').replace(' ', '')
                 return int(units_sold)
@@ -99,28 +99,28 @@ def find_units_sold(num):
 
 
 # inputs
-username = str(input('Enter username: '))
-password = str(input('Enter password: '))
-products.append(str(input('Enter traditional product name: ')))
-products.append(str(input('Enter low-end product name: ')))
-products.append(str(input('Enter high-end product name: ')))
-products.append(str(input('Enter performance product name: ')))
-products.append(str(input('Enter size product name: ')))
-y_n = str(input('All production forecast margins the same? [y/n]: ')).lower()
+username =                            str(input('Enter username:----------------------------------->'))
+password =                            str(input('Enter password:----------------------------------->'))
+products.append(                      str(input('Enter traditional product name:------------------->')).lower())
+products.append(                      str(input('Enter low-end product name:----------------------->')).lower())
+products.append(                      str(input('Enter high-end product name:---------------------->')).lower())
+products.append(                      str(input('Enter performance product name:------------------->')).lower())
+products.append(                      str(input('Enter size product name:-------------------------->')).lower())
+y_n =                                 str(input('All production forecast margins the same? [y/n]:-->')).lower()
 
 if y_n == 'y':
-    production_margin = float(input('Enter production margin: '))
+    production_margin =             float(input('Enter production margin:-------------------------->'))
     traditional_production_margin = production_margin
     low_end_production_margin = production_margin
     high_end_production_margin = production_margin
     performance_production_margin = production_margin
     size_production_margin = production_margin
 else:
-    traditional_production_margin = float(input('Enter traditional production margin: '))
-    low_end_production_margin = float(input('Enter low-end production margin: '))
-    high_end_production_margin = float(input('Enter high-end production margin: '))
-    performance_production_margin = float(input('Enter performance production margin: '))
-    size_production_margin = float(input('Enter size production margin: '))
+    traditional_production_margin = float(input('Enter traditional production margin:-------------->'))
+    low_end_production_margin =     float(input('Enter low-end production margin:------------------>'))
+    high_end_production_margin =    float(input('Enter high-end production margin:----------------->'))
+    performance_production_margin = float(input('Enter performance production margin:-------------->'))
+    size_production_margin =        float(input('Enter size production margin:--------------------->'))
                                  
 wait_time = int(input('Enter step wait time (sec; at least 3 is recommended): '))
 #### chrome_driver_path = str(input('Enter Chrome Driver path: '))
@@ -173,6 +173,8 @@ for step in courier_navigation:
         time.sleep(wait_time+3)
         tabs = driver.window_handles
         driver.switch_to.window(tabs[-1])
+        del password
+        del username
         
     else:
         button = driver.find_element(By.XPATH, step)
