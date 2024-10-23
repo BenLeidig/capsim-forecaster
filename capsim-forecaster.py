@@ -20,6 +20,22 @@ import time
 # inputs
 username = str(input('Enter username: '))
 password = str(input('Enter password: '))
+y_n = str(input('Production margins; all the same? (y/n): ')).lower()
+
+if y_n == 'y':
+    production_margin = int(input('Enter production margin: '))
+    traditional_production_margin = production_margin
+    low_end_production_margin = production_margin
+    high_end_production_margin = production_margin
+    performance_production_margin = production_margin
+    size_production_margin = production_margin
+else:
+    traditional_production_margin = int(input('Enter traditional production margin: '))
+    low_end_production_margin = int(input('Enter low-end production margin: '))
+    high_end_production_margin = int(input('Enter high-end production margin: '))
+    performance_production_margin = int(input('Enter performance production margin: '))
+    size_production_margin = int(input('Enter size production margin: '))
+                                 
 wait_time = int(input('Enter wait time (sec; at least 3 is recommended): '))
 ## chrome_driver_path = str(input('Enter Chrome Driver path: '))
 chrome_driver_path = '/Users/benleidig/Downloads/chromedriver-mac-arm64/chromedriver'
@@ -33,6 +49,20 @@ courier_navigation = ['/html/body/div[2]/div/div/main/div[1]/form/div[3]/button'
                       '/html/body/nav/div/div[2]/ul/li[4]/ul/li[2]/a',
                       '/html/body/div[3]/div/div/div/div/div[1]/table/tbody/tr/td[2]/a'
                       ]
+
+# market info dataframe
+df = pd.DataFrame({'market':['traditional', 'low-end', 'high-end', 'performance', 'size'],
+                   'market-size':[0, 0, 0, 0, 0],
+                   'demand-growth-rate':[0, 0, 0, 0, 0],
+                   'potential-market-share':[0, 0, 0, 0, 0],
+                   'product-satisfaction':[0, 0, 0, 0, 0],
+                   'segment-satisfaction':[0, 0, 0, 0, 0],
+                   'last-year-units-sold':[0, 0, 0, 0, 0],
+                   'leftover-inventory': [0, 0, 0, 0, 0],
+                   'production-margin': [traditional_production_margin, low_end_production_margin, high_end_production_margin, performance_production_margin, size_production_margin],
+                   'marketing-forecast': [0, 0, 0, 0, 0],
+                   'production-forecast': [0, 0, 0, 0, 0]
+                   })
 
 # configurations
 options = Options()
@@ -61,3 +91,5 @@ for step in courier_navigation:
         button = driver.find_element(By.XPATH, step)
         button.click()
         time.sleep(wait_time)
+        
+
