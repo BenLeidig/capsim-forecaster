@@ -96,33 +96,48 @@ def find_units_sold(num):
                 return int(units_sold)
     except Exception as e:
         print(f'Error processing units sold for {target_product}: {e}')
+        
+def find_leftover_inventory(num):
+    try:
+        tbody_xpath = '/html/body/div[1]/div/div/div/div[4]/div/div[1]/div[3]/div/table/tbody'
+        rows = driver.find_elements(By.XPATH, f'{tbody_xpath}/tr')
+        target_product = products[num]
+        for row in rows:
+            product_td = row.find_element(By.XPATH, 'td[1]')
+            product = product_td.text.replace(',', '').replace(' ', '')
+            if product.lower() == target_product:
+                value_td = row.find_element(By.XPATH, 'td[4]')
+                units_sold = value_td.text.replace(',', '').replace(' ', '')
+                return int(units_sold)
+    except Exception as e:
+        print(f'Error processing units sold for {target_product}: {e}')
 
 
 # inputs
-username =                            str(input('Enter username:----------------------------------->'))
-password =                            str(input('Enter password:----------------------------------->'))
-products.append(                      str(input('Enter traditional product name:------------------->')).lower())
-products.append(                      str(input('Enter low-end product name:----------------------->')).lower())
-products.append(                      str(input('Enter high-end product name:---------------------->')).lower())
-products.append(                      str(input('Enter performance product name:------------------->')).lower())
-products.append(                      str(input('Enter size product name:-------------------------->')).lower())
-y_n =                                 str(input('All production forecast margins the same? [y/n]:-->')).lower()
+username =                            str(input('Enter username:------------------------------------------->'))
+password =                            str(input('Enter password:------------------------------------------->'))
+products.append(                      str(input('Enter traditional product name:--------------------------->')).lower())
+products.append(                      str(input('Enter low-end product name:------------------------------->')).lower())
+products.append(                      str(input('Enter high-end product name:------------------------------>')).lower())
+products.append(                      str(input('Enter performance product name:--------------------------->')).lower())
+products.append(                      str(input('Enter size product name:---------------------------------->')).lower())
+y_n =                                 str(input('All production forecast margins the same? [y/n]:---------->')).lower()
 
 if y_n == 'y':
-    production_margin =             float(input('Enter production margin:-------------------------->'))
+    production_margin =             float(input('Enter production margin:---------------------------------->'))
     traditional_production_margin = production_margin
     low_end_production_margin = production_margin
     high_end_production_margin = production_margin
     performance_production_margin = production_margin
     size_production_margin = production_margin
 else:
-    traditional_production_margin = float(input('Enter traditional production margin:-------------->'))
-    low_end_production_margin =     float(input('Enter low-end production margin:------------------>'))
-    high_end_production_margin =    float(input('Enter high-end production margin:----------------->'))
-    performance_production_margin = float(input('Enter performance production margin:-------------->'))
-    size_production_margin =        float(input('Enter size production margin:--------------------->'))
+    traditional_production_margin = float(input('Enter traditional production margin:---------------------->'))
+    low_end_production_margin =     float(input('Enter low-end production margin:-------------------------->'))
+    high_end_production_margin =    float(input('Enter high-end production margin:------------------------->'))
+    performance_production_margin = float(input('Enter performance production margin:---------------------->'))
+    size_production_margin =        float(input('Enter size production margin:----------------------------->'))
                                  
-wait_time = int(input('Enter step wait time (sec; at least 3 is recommended): '))
+wait_time =                           int(input('Enter step wait time (sec; at least 3 is recommended):---->'))
 #### chrome_driver_path = str(input('Enter Chrome Driver path: '))
 chrome_driver_path = '/Users/benleidig/Downloads/chromedriver-mac-arm64/chromedriver'
 #### browser_path = str(input('Enter browser path: '))
@@ -205,4 +220,8 @@ for i in range(0, 5):
 for i in range(0, 5):
     df.iloc[i, 6] = find_units_sold(i)
     
-print(df[['market', 'units-sold']])
+# inputting leftover inventory
+for i in range(0, 5):
+    df.iloc[i, 7] = find_leftover_inventory(i)
+    
+print(df[['market', 'leftover-inventory']])
