@@ -224,4 +224,20 @@ for i in range(0, 5):
 for i in range(0, 5):
     df.iloc[i, 7] = find_leftover_inventory(i)
     
-print(df[['market', 'leftover-inventory']])
+# calculating basic growth forecasts
+df['m-basic-growth'] = (df['units-sold']*(1+df['demand-growth-rate'])-df['leftover-inventory'])*0.9
+df['p-basic-growth'] = (df['units-sold']*(1+df['demand-growth-rate'])-df['leftover-inventory'])*df['production-margin']
+
+# calculating potential market share forecasts
+df['m-potential-model'] = (df['market-size']*(1+df['demand-growth-rate'])*df['potential-market-share']-df['leftover-inventory'])*0.9
+df['p-potential-model'] = (df['market-size']*(1+df['demand-growth-rate'])*df['potential-market-share']-df['leftover-inventory'])*df['production-margin']
+
+# calculating satisfaction score share forecasts
+df['m-satisfaction-model'] = (df['market-size']*(1+df['demand-growth-rate'])*(df['product-satisfaction']/df['segment-satisfaction'])-df['leftover-inventory'])*0.9
+df['p-satisfaction-model'] = (df['market-size']*(1+df['demand-growth-rate'])*(df['product-satisfaction']/df['segment-satisfaction'])-df['leftover-inventory'])*df['production-margin']
+
+# calculating averaged forecasts
+df['marketing-forecast'] = (df['m-basic-growth']+df['m-potential-model']+df['m-satisfaction-model'])/3
+df['production-forecast'] = (df['p-basic-growth']+df['p-potential-model']+df['p-satisfaction-model'])/3
+
+print(df[['market', 'marketing-forecast', 'production-forecast']])
