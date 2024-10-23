@@ -114,28 +114,28 @@ def find_leftover_inventory(num):
 
 
 # inputs
-username =                            str(input('Enter username:------------------------------------------->'))
-password =                            str(input('Enter password:------------------------------------------->'))
-products.append(                      str(input('Enter traditional product name:--------------------------->')).lower())
-products.append(                      str(input('Enter low-end product name:------------------------------->')).lower())
-products.append(                      str(input('Enter high-end product name:------------------------------>')).lower())
-products.append(                      str(input('Enter performance product name:--------------------------->')).lower())
-products.append(                      str(input('Enter size product name:---------------------------------->')).lower())
-y_n =                                 str(input('All production forecast margins the same? [y/n]:---------->')).lower()
+username =                            str(input('Enter username-------------------------------------------->'))
+password =                            str(input('Enter password-------------------------------------------->'))
+products.append(                      str(input('Enter traditional product name---------------------------->')).lower())
+products.append(                      str(input('Enter low-end product name-------------------------------->')).lower())
+products.append(                      str(input('Enter high-end product name------------------------------->')).lower())
+products.append(                      str(input('Enter performance product name---------------------------->')).lower())
+products.append(                      str(input('Enter size product name----------------------------------->')).lower())
+y_n =                                 str(input('All production forecast margins the same? [y/n]----------->')).lower()
 
 if y_n == 'y':
-    production_margin =             float(input('Enter production margin:---------------------------------->'))
+    production_margin =             float(input('Enter production margin----------------------------------->'))
     traditional_production_margin = production_margin
     low_end_production_margin = production_margin
     high_end_production_margin = production_margin
     performance_production_margin = production_margin
     size_production_margin = production_margin
 else:
-    traditional_production_margin = float(input('Enter traditional production margin:---------------------->'))
-    low_end_production_margin =     float(input('Enter low-end production margin:-------------------------->'))
-    high_end_production_margin =    float(input('Enter high-end production margin:------------------------->'))
-    performance_production_margin = float(input('Enter performance production margin:---------------------->'))
-    size_production_margin =        float(input('Enter size production margin:----------------------------->'))
+    traditional_production_margin = float(input('Enter traditional production margin----------------------->'))
+    low_end_production_margin =     float(input('Enter low-end production margin--------------------------->'))
+    high_end_production_margin =    float(input('Enter high-end production margin-------------------------->'))
+    performance_production_margin = float(input('Enter performance production margin----------------------->'))
+    size_production_margin =        float(input('Enter size production margin------------------------------>'))
                                  
 wait_time =                           int(input('Enter step wait time (sec; at least 3 is recommended):---->'))
 #### chrome_driver_path = str(input('Enter Chrome Driver path: '))
@@ -219,7 +219,7 @@ for i in range(0, 5):
 # inputting units sold
 for i in range(0, 5):
     df.iloc[i, 6] = find_units_sold(i)
-    
+
 # inputting leftover inventory
 for i in range(0, 5):
     df.iloc[i, 7] = find_leftover_inventory(i)
