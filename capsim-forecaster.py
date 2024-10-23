@@ -61,17 +61,17 @@ def find_demand_growth_rate(num):
 
 def find_product_satisfaction(num):
     try:
-        product_xpath = f'/html/body/div[1]/div/div/div/div[{num}]/div/div[1]/div[2]/div[3]/table/tbody/tr[1]/td[1]'
-        product_td = driver.find_element(By.XPATH, product_xpath)
-        product_list = product_td.text
-        product = product_list[0]
-        print(product)
-        if product == products[num-5]:
-            value_xpath = f'/html/body/div[1]/div/div/div/div[{num}]/div/div[1]/div[2]/div[3]/table/tbody/tr[1]/td[15]'
-            value_td = driver.find_element(By.XPATH, value_xpath)
-            return int(value_td.text)
+        tr_xpath = f'/html/body/div[1]/div/div/div/div[{num}]/div/div[1]/div[2]/div[3]/table/tbody/tr'
+        rows = driver.find_elements(By.XPATH, tr_xpath)
+        for row in rows:
+            product_td = row.find_element(By.XPATH, 'td[1]')
+            product = product_td.text
+            if product in products:
+                value_td = row.find_element(By.XPATH, 'td[15]')
+                return int(value_td.text)
     except Exception as e:
         print(f'Error processing div[{num}]: {e}')
+
         
 def find_segment_satisfaction(num):
     try:
