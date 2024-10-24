@@ -7,6 +7,7 @@ Created on Tue Oct 22 14:21:38 2024
 """
 
 # imports
+import os
 import time
 import pandas as pd
 from selenium import webdriver
@@ -25,7 +26,33 @@ courier_navigation = ['/html/body/div[2]/div/div/main/div[1]/form/div[3]/button'
                       '/html/body/div[3]/div/div/div/div/div[1]/table/tbody/tr/td[2]/a'
                       ]
 
+df = pd.DataFrame({'market':['traditional', 'low-end', 'high-end', 'performance', 'size'],
+                   'market-size':[0, 0, 0, 0, 0],
+                   'demand-growth-rate':[0.0, 0.0, 0.0, 0.0, 0.0],
+                   'potential-market-share':[0.0, 0.0, 0.0, 0.0, 0.0],
+                   'product-satisfaction':[0, 0, 0, 0, 0],
+                   'segment-satisfaction':[0, 0, 0, 0, 0],
+                   'units-sold':[0, 0, 0, 0, 0],
+                   'leftover-inventory': [0, 0, 0, 0, 0],
+                   'production-margin': [None, None, None, None, None],
+                   'm-basic-growth': [0.0, 0.0, 0.0, 0.0, 0.0],
+                   'p-basic-growth': [0.0, 0.0, 0.0, 0.0, 0.0],
+                   'm-potential-model': [0.0, 0.0, 0.0, 0.0, 0.0],
+                   'p-potential-model': [0.0, 0.0, 0.0, 0.0, 0.0],
+                   'm-satisfaction-model': [0.0, 0.0, 0.0, 0.0, 0.0],
+                   'p-satisfaction-model': [0.0, 0.0, 0.0, 0.0, 0.0],
+                   'marketing-forecast': [0.0, 0.0, 0.0, 0.0, 0.0],
+                   'production-forecast': [0.0, 0.0, 0.0, 0.0, 0.0]
+                   })
+
+q = False
+
 # function definitions
+def quitter(var):
+    global q
+    if var.lower() == 'quit':
+        q = True
+
 def find_market_size(num):
     try:
         target_product = products[num-5]
@@ -120,130 +147,136 @@ def find_leftover_inventory(num):
     except Exception as e:
         print(f'Error processing units sold for {target_product}: {e}')
 
+py_file_path = __file__
+try:
+    
+
+while not q:
+
 # inputs
-username =                            str(input('Enter username-------------------------------------------->'))
-password =                            str(input('Enter password-------------------------------------------->'))
-products.append(                      str(input('Enter traditional product name---------------------------->')).lower())
-products.append(                      str(input('Enter low-end product name-------------------------------->')).lower())
-products.append(                      str(input('Enter high-end product name------------------------------->')).lower())
-products.append(                      str(input('Enter performance product name---------------------------->')).lower())
-products.append(                      str(input('Enter size product name----------------------------------->')).lower())
-y_n =                                 str(input('All production forecast margins the same? [y/n]----------->')).lower()
+    username = str(input('Enter username-------------------------------------------->'))
+    quitter(username)
+    if q:
+        break
+    
+    password = str(input('Enter password-------------------------------------------->'))
+    quitter(password)
+    if q:
+        break
+    
+    for market in df['market']:
+        product_temp = str(input(f'Enter {market} product name: ')).lower()
+        quitter(product_temp)
+        if q:
+            break
+        products.append(product_temp)
 
-if y_n == 'y':
-    production_margin =             float(input('Enter production margin----------------------------------->'))
-    traditional_production_margin = production_margin
-    low_end_production_margin = production_margin
-    high_end_production_margin = production_margin
-    performance_production_margin = production_margin
-    size_production_margin = production_margin
-else:
-    traditional_production_margin = float(input('Enter traditional production margin----------------------->'))
-    low_end_production_margin =     float(input('Enter low-end production margin--------------------------->'))
-    high_end_production_margin =    float(input('Enter high-end production margin-------------------------->'))
-    performance_production_margin = float(input('Enter performance production margin----------------------->'))
-    size_production_margin =        float(input('Enter size production margin------------------------------>'))
-                                 
-wait_time =                           int(input('Enter step wait time (sec; at least 3 is recommended):---->'))
+    y_n = str(input('All production forecast margins the same? [y/n]----------->')).lower()
+    quitter(y_n)
+    if q:
+        break
+    if y_n == 'y' | y_n == 'yes':
+        production_margin = float(input('Enter production margin----------------------------------->'))
+        df['production-margin'].append([production_margin]*5)
+    elif y_n == 'n' | y_n == 'no':
+        for market in df['markets']:
+            production_margin_temp = float(input('Enter {market} production margin: '))
+            quitter(production_margin_temp)
+            if q:
+                break
+            df['production-margin'].append(production_margin_temp)
+                                     
+    wait_time = int(input('Enter step wait time (sec; at least 3 is recommended):---->'))
 #### chrome_driver_path = str(input('Enter Chrome Driver path: '))
-chrome_driver_path = '/Users/benleidig/Downloads/chromedriver-mac-arm64/chromedriver'
+    chrome_driver_path = '/Users/benleidig/Downloads/chromedriver-mac-arm64/chromedriver'
 #### browser_path = str(input('Enter browser path: '))
-browser_path = "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
-
-print('\nProcessing...\n')
-time.sleep(wait_time)
-
-# market info dataframe
-df = pd.DataFrame({'market':['traditional', 'low-end', 'high-end', 'performance', 'size'],
-                   'market-size':[0, 0, 0, 0, 0],
-                   'demand-growth-rate':[0.0, 0.0, 0.0, 0.0, 0.0],
-                   'potential-market-share':[0.0, 0.0, 0.0, 0.0, 0.0],
-                   'product-satisfaction':[0, 0, 0, 0, 0],
-                   'segment-satisfaction':[0, 0, 0, 0, 0],
-                   'units-sold':[0, 0, 0, 0, 0],
-                   'leftover-inventory': [0, 0, 0, 0, 0],
-                   'production-margin': [traditional_production_margin, low_end_production_margin, high_end_production_margin, performance_production_margin, size_production_margin],
-                   'm-basic-growth': [0.0, 0.0, 0.0, 0.0, 0.0],
-                   'p-basic-growth': [0.0, 0.0, 0.0, 0.0, 0.0],
-                   'm-potential-model': [0.0, 0.0, 0.0, 0.0, 0.0],
-                   'p-potential-model': [0.0, 0.0, 0.0, 0.0, 0.0],
-                   'm-satisfaction-model': [0.0, 0.0, 0.0, 0.0, 0.0],
-                   'p-satisfaction-model': [0.0, 0.0, 0.0, 0.0, 0.0],
-                   'marketing-forecast': [0.0, 0.0, 0.0, 0.0, 0.0],
-                   'production-forecast': [0.0, 0.0, 0.0, 0.0, 0.0]
-                   })
+    browser_path = "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
+    
+    print('\nProcessing...\n')
+    time.sleep(wait_time)
 
 # configurations
-options = Options()
-options.binary_location = browser_path
-service = Service(executable_path=chrome_driver_path)
-driver = webdriver.Chrome(service=service, options=options)
+    options = Options()
+    options.binary_location = browser_path
+    service = Service(executable_path=chrome_driver_path)
+    driver = webdriver.Chrome(service=service, options=options)
 
 # retrieving url and inputting username and password
-driver.get('https://ww2.capsim.com/login/')
-username_field = driver.find_element(By.ID, 'username')
-username_field.send_keys(username)
-password_field = driver.find_element(By.ID, 'password')
-password_field.send_keys(password)
+    driver.get('https://ww2.capsim.com/login/')
+    username_field = driver.find_element(By.ID, 'username')
+    username_field.send_keys(username)
+    password_field = driver.find_element(By.ID, 'password')
+    password_field.send_keys(password)
 
 # navigating to courier report
-for step in courier_navigation:
-    
-    if step == '/html/body/div[3]/div/div/div/div/div[1]/table/tbody/tr/td[2]/a':
-        button = driver.find_element(By.XPATH, step)
-        button.click()
-        time.sleep(wait_time+3)
-        tabs = driver.window_handles
-        driver.switch_to.window(tabs[-1])
-        del password
-        del username
-    else:
-        button = driver.find_element(By.XPATH, step)
-        button.click()
-        time.sleep(wait_time)
+    for step in courier_navigation:
+        
+        if step == '/html/body/div[3]/div/div/div/div/div[1]/table/tbody/tr/td[2]/a':
+            button = driver.find_element(By.XPATH, step)
+            button.click()
+            time.sleep(wait_time+3)
+            tabs = driver.window_handles
+            driver.switch_to.window(tabs[-1])
+            del password
+            del username
+        else:
+            button = driver.find_element(By.XPATH, step)
+            button.click()
+            time.sleep(wait_time)
 
 # inputting market size
-for i in range(0, 5):
-    df.iloc[i, 1] = find_market_size(i+5)
+    for i in range(0, 5):
+        df.iloc[i, 1] = find_market_size(i+5)
     
 # inputting demand growth rate
-for i in range(0, 5):
-    df.iloc[i, 2] = find_demand_growth_rate(i+5)
+    for i in range(0, 5):
+        df.iloc[i, 2] = find_demand_growth_rate(i+5)
     
 # inputting potential market share
-for i in range(0, 5):
-    df.iloc[i, 3] = find_potential_market_share(i)
+    for i in range(0, 5):
+        df.iloc[i, 3] = find_potential_market_share(i)
 
 # inputting product satisfaction
-for i in range(0, 5):
-    df.iloc[i, 4] = find_product_satisfaction(i+5)
+    for i in range(0, 5):
+        df.iloc[i, 4] = find_product_satisfaction(i+5)
     
 # inputting segment satisfaction
-for i in range(0, 5):
-    df.iloc[i, 5] = find_segment_satisfaction(i+5)
+    for i in range(0, 5):
+        df.iloc[i, 5] = find_segment_satisfaction(i+5)
     
 # inputting units sold
-for i in range(0, 5):
-    df.iloc[i, 6] = find_units_sold(i)
+    for i in range(0, 5):
+        df.iloc[i, 6] = find_units_sold(i)
 
 # inputting leftover inventory
-for i in range(0, 5):
-    df.iloc[i, 7] = find_leftover_inventory(i)
+    for i in range(0, 5):
+        df.iloc[i, 7] = find_leftover_inventory(i)
     
 # calculating basic growth forecasts
-df['m-basic-growth'] = (df['units-sold']*(1+df['demand-growth-rate'])-df['leftover-inventory'])*0.9
-df['p-basic-growth'] = (df['units-sold']*(1+df['demand-growth-rate'])-df['leftover-inventory'])*df['production-margin']
+    df['m-basic-growth'] = (df['units-sold']*(1+df['demand-growth-rate'])-df['leftover-inventory'])*0.9
+    df['p-basic-growth'] = (df['units-sold']*(1+df['demand-growth-rate'])-df['leftover-inventory'])*df['production-margin']
 
 # calculating potential market share forecasts
-df['m-potential-model'] = (df['market-size']*(1+df['demand-growth-rate'])*df['potential-market-share']-df['leftover-inventory'])*0.9
-df['p-potential-model'] = (df['market-size']*(1+df['demand-growth-rate'])*df['potential-market-share']-df['leftover-inventory'])*df['production-margin']
+    df['m-potential-model'] = (df['market-size']*(1+df['demand-growth-rate'])*df['potential-market-share']-df['leftover-inventory'])*0.9
+    df['p-potential-model'] = (df['market-size']*(1+df['demand-growth-rate'])*df['potential-market-share']-df['leftover-inventory'])*df['production-margin']
 
 # calculating satisfaction score share forecasts
-df['m-satisfaction-model'] = (df['market-size']*(1+df['demand-growth-rate'])*(df['product-satisfaction']/df['segment-satisfaction'])-df['leftover-inventory'])*0.9
-df['p-satisfaction-model'] = (df['market-size']*(1+df['demand-growth-rate'])*(df['product-satisfaction']/df['segment-satisfaction'])-df['leftover-inventory'])*df['production-margin']
+    df['m-satisfaction-model'] = (df['market-size']*(1+df['demand-growth-rate'])*(df['product-satisfaction']/df['segment-satisfaction'])-df['leftover-inventory'])*0.9
+    df['p-satisfaction-model'] = (df['market-size']*(1+df['demand-growth-rate'])*(df['product-satisfaction']/df['segment-satisfaction'])-df['leftover-inventory'])*df['production-margin']
 
 # calculating averaged forecasts
-df['marketing-forecast'] = (df['m-basic-growth']+df['m-potential-model']+df['m-satisfaction-model'])/3
-df['production-forecast'] = (df['p-basic-growth']+df['p-potential-model']+df['p-satisfaction-model'])/3
+    df['marketing-forecast'] = (df['m-basic-growth']+df['m-potential-model']+df['m-satisfaction-model'])/3
+    df['production-forecast'] = (df['p-basic-growth']+df['p-potential-model']+df['p-satisfaction-model'])/3
 
-print(df[['market', 'marketing-forecast', 'production-forecast']])
+    print(df[['market', 'marketing-forecast', 'production-forecast']])
+    
+    query_count = 1
+    while True:
+        query = str(input(f"\nEnter query, one of: \n\n{(', '.join(df.columns[1:])).replace('-', ' ')}, or quit to quit.\n\nQuery[{query_count}]: "))
+        quitter(query)
+        if q:
+            break
+        if query:
+            query_count += 1
+            print('\n', df[['market', f"{query.replace(' ', '-')}"]])
+
