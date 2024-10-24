@@ -27,14 +27,22 @@ courier_navigation = ['/html/body/div[2]/div/div/main/div[1]/form/div[3]/button'
 
 # function definitions
 def find_market_size(num):
-    market_size_element = driver.find_element(By.XPATH, f'/html/body/div[1]/div/div/div/div[{num}]/div/div[1]/div[2]/div[1]/div[1]/div[1]/div/table/tbody/tr[1]/td[2]')
-    market_size = int(market_size_element.text.replace(',', '').replace(' ', ''))
-    return market_size
+    try:
+        target_product = products[num-5]
+        market_size_element = driver.find_element(By.XPATH, f'/html/body/div[1]/div/div/div/div[{num}]/div/div[1]/div[2]/div[1]/div[1]/div[1]/div/table/tbody/tr[1]/td[2]')
+        market_size = int(market_size_element.text.replace(',', '').replace(' ', ''))
+        return market_size
+    except Exception as e:
+        print(f'Error processing market size for {target_product}: {e}')
 
 def find_demand_growth_rate(num):
-    demand_growth_rate_element = driver.find_element(By.XPATH, f'/html/body/div[1]/div/div/div/div[{num}]/div/div[1]/div[2]/div[1]/div[1]/div[1]/div/table/tbody/tr[4]/td[2]')
-    demand_growth_rate = float(demand_growth_rate_element.text.replace('%', '').replace('.', '').replace(' ', ''))*0.001
-    return demand_growth_rate
+    try:
+        target_product = products[num-5]
+        demand_growth_rate_element = driver.find_element(By.XPATH, f'/html/body/div[1]/div/div/div/div[{num}]/div/div[1]/div[2]/div[1]/div[1]/div[1]/div/table/tbody/tr[4]/td[2]')
+        demand_growth_rate = float(demand_growth_rate_element.text.replace('%', '').replace('.', '').replace(' ', ''))*0.001
+        return demand_growth_rate
+    except Exception as e:
+        print(f'Error processing demand growth rate for for {target_product}: {e}')
 
 def find_potential_market_share(num):
     try:
@@ -111,7 +119,6 @@ def find_leftover_inventory(num):
                 return int(units_sold)
     except Exception as e:
         print(f'Error processing units sold for {target_product}: {e}')
-
 
 # inputs
 username =                            str(input('Enter username-------------------------------------------->'))
@@ -190,7 +197,6 @@ for step in courier_navigation:
         driver.switch_to.window(tabs[-1])
         del password
         del username
-        
     else:
         button = driver.find_element(By.XPATH, step)
         button.click()
