@@ -210,11 +210,11 @@ while not q:
     elif y_n == 'n' or y_n == 'no':
         market_num = 0
         for market in df['market']:
-            production_margin_temp = float(input('Enter {market} production margin: '))
+            production_margin_temp = float(input(f'Enter {market} production margin: '))
             quitter(production_margin_temp)
             if q:
                 break
-            df.iloc[market_num, 8].append(production_margin_temp)
+            df.iloc[market_num, 8] = production_margin_temp
             market_num += 1
                                      
     wait_time = int(input('Enter step wait time (sec; at least 3 is recommended):---->'))
