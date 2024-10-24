@@ -209,7 +209,7 @@ while not q:
         df[['production-margin']] = production_margin
     elif y_n == 'n' or y_n == 'no':
         market_num = 0
-        for market in df['markets']:
+        for market in df['market']:
             production_margin_temp = float(input('Enter {market} production margin: '))
             quitter(production_margin_temp)
             if q:
