@@ -10,6 +10,7 @@ Created on Tue Oct 22 14:21:38 2024
 import os
 import time
 import pandas as pd
+from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -26,6 +27,7 @@ courier_navigation = ['/html/body/div[2]/div/div/main/div[1]/form/div[3]/button'
                       '/html/body/div[3]/div/div/div/div/div[1]/table/tbody/tr/td[2]/a'
                       ]
 
+# dataframe set up
 df = pd.DataFrame({'market':['traditional', 'low-end', 'high-end', 'performance', 'size'],
                    'market-size':[0, 0, 0, 0, 0],
                    'demand-growth-rate':[0.0, 0.0, 0.0, 0.0, 0.0],
@@ -45,12 +47,13 @@ df = pd.DataFrame({'market':['traditional', 'low-end', 'high-end', 'performance'
                    'production-forecast': [0.0, 0.0, 0.0, 0.0, 0.0]
                    })
 
+# defining q as False to engage while loop
 q = False
 
 # function definitions
 def quitter(var):
     global q
-    if var.lower() == 'quit':
+    if str(var).lower() == 'quit':
         q = True
 
 def find_market_size(num):
@@ -147,9 +150,32 @@ def find_leftover_inventory(num):
     except Exception as e:
         print(f'Error processing units sold for {target_product}: {e}')
 
+
+# find directory path
 py_file_path = __file__
-try:
-    
+file_path = py_file_path.replace(f'{Path(__file__).name}', '')
+
+# Attempt to retrieve chrome driver path
+## If unable, write new file `chrome-driver-path.txt`
+driver_attempt = os.path.join(file_path, 'chrome-driver-path.txt')
+if not os.path.exists(driver_attempt) or os.path.getsize(driver_attempt) == 0:
+    with open(driver_attempt, 'w') as file:
+        chrome_driver_path = input('Enter Chrome driver path---------------------------------->')
+        file.write(chrome_driver_path)
+else:
+    with open(driver_attempt, 'r') as file:
+        chrome_driver_path = file.read()
+
+# Attempt to retrieve browser path
+## If unable, write new file `browser-path.txt`
+browser_attempt = os.path.join(file_path, 'browser-path.txt')
+if not os.path.exists(browser_attempt) or os.path.getsize(browser_attempt) == 0:
+    with open(browser_attempt, 'w') as file:
+        browser_path = input('Enter browser path---------------------------------------->')
+        file.write(browser_path)
+else:
+    with open(browser_attempt, 'r') as file:
+        browser_path = file.read()
 
 while not q:
 
@@ -158,7 +184,7 @@ while not q:
     quitter(username)
     if q:
         break
-    
+
     password = str(input('Enter password-------------------------------------------->'))
     quitter(password)
     if q:
@@ -175,22 +201,23 @@ while not q:
     quitter(y_n)
     if q:
         break
-    if y_n == 'y' | y_n == 'yes':
+    if y_n == 'y' or y_n == 'yes':
         production_margin = float(input('Enter production margin----------------------------------->'))
-        df['production-margin'].append([production_margin]*5)
-    elif y_n == 'n' | y_n == 'no':
+        quitter(production_margin)
+        if q:
+            break
+        df[['production-margin']] = production_margin
+    elif y_n == 'n' or y_n == 'no':
+        market_num = 0
         for market in df['markets']:
             production_margin_temp = float(input('Enter {market} production margin: '))
             quitter(production_margin_temp)
             if q:
                 break
-            df['production-margin'].append(production_margin_temp)
+            df.iloc[market_num, 8].append(production_margin_temp)
+            market_num += 1
                                      
     wait_time = int(input('Enter step wait time (sec; at least 3 is recommended):---->'))
-#### chrome_driver_path = str(input('Enter Chrome Driver path: '))
-    chrome_driver_path = '/Users/benleidig/Downloads/chromedriver-mac-arm64/chromedriver'
-#### browser_path = str(input('Enter browser path: '))
-    browser_path = "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
     
     print('\nProcessing...\n')
     time.sleep(wait_time)
@@ -268,8 +295,10 @@ while not q:
     df['marketing-forecast'] = (df['m-basic-growth']+df['m-potential-model']+df['m-satisfaction-model'])/3
     df['production-forecast'] = (df['p-basic-growth']+df['p-potential-model']+df['p-satisfaction-model'])/3
 
+# print market name and forecasts
     print(df[['market', 'marketing-forecast', 'production-forecast']])
     
+# querying system with query counter
     query_count = 1
     while True:
         query = str(input(f"\nEnter query, one of: \n\n{(', '.join(df.columns[1:])).replace('-', ' ')}, or quit to quit.\n\nQuery[{query_count}]: "))
