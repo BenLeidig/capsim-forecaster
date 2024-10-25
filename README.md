@@ -45,7 +45,7 @@ Visit https://googlechromelabs.github.io/chrome-for-testing/ for the appropriate
 #### Browser Path
 Locate your typically used browser in your file explorer. Right click the file (should named similarly to `Chrome.app`, or `Safari.app`, if on macOS), and copy the pathname (if on macOS, right click and, while holding `option` on your keyboard, click `Copy "____" as Pathname`). Enter this into the program when prompted to do so.
 
-#### Running the Script
+### Running the Script
 The script does not start on its own. You must run it first by clicking in the script text and press `shift`+`return`. (If you are using Spyder, prompts will appear in the bottom right.)
 
 ### "Enter step wait time (sec; >1)"
