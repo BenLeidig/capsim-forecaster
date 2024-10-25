@@ -15,6 +15,9 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support import expected_conditions as EC
 
 # creating empty lists
 products = []
@@ -23,8 +26,7 @@ products = []
 courier_navigation = ['/html/body/div[2]/div/div/main/div[1]/form/div[3]/button',
                       '/html/body/div[1]/div/main/div/div/div[5]/a',
                       '/html/body/nav/div/div[2]/ul/li[4]/a',
-                      '/html/body/nav/div/div[2]/ul/li[4]/ul/li[2]/a',
-                      '/html/body/div[3]/div/div/div/div/div[1]/table/tbody/tr[1]/td[2]/a'
+                      '/html/body/nav/div/div[2]/ul/li[4]/ul/li[2]/a'
                       ]
 
 # dataframe set up
@@ -190,6 +192,18 @@ while not q:
     if q:
         break
     
+    while True:
+        try:
+            round_num_temp = input('Enter round number: ')
+            quitter(round_num_temp)
+            if q:
+                break
+            round_num = int(round_num_temp)
+            break
+            
+        except ValueError:
+            print('\nInvalid input. Please enter round number as an integer.\n')
+    
     for market in df['market']:
         product_temp = str(input(f'Enter {market} product name: ')).lower()
         quitter(product_temp)
@@ -197,20 +211,20 @@ while not q:
             break
         products.append(product_temp)
 
-    # Initialize b and q
+# initialize b and q
     b = False
     q = False
     
     while True:
         try:
-            y_n = str(input('All production forecast margins the same? [y/n]----------->')).lower()
+            y_n = str(input("Are all markets' forecast buffers the same? [y/n]----->")).lower()
             quitter(y_n)
             if q:
                 break
             if y_n == 'y' or y_n == 'yes':
                 while True:
                     try:
-                        production_buffer = float(input('Enter production margin----------------------------------->'))
+                        production_buffer = float(input('Enter production buffer---------------------------------->'))
                         quitter(production_buffer)
                         if q:
                             break
@@ -218,29 +232,29 @@ while not q:
                         b = True
                         break
                     except ValueError:
-                        print('\nPlease enter forecast in the format #.##\n')
+                        print('\nPlease enter buffer in the format #.##\n')
             elif y_n == 'n' or y_n == 'no':
                 market_num = 0
                 for market in df['market']:
                     while True:
                         try:
-                            production_buffer_temp = float(input(f'Enter {market} production margin: '))
+                            production_buffer_temp = float(input(f'Enter {market} production buffer: '))
                             quitter(production_buffer_temp)
                             if q:
                                 break
                             df.iloc[market_num, 8] = production_buffer_temp
                             market_num += 1
                         except ValueError:
-                            print('\nPlease enter forecast in the format #.##\n')
+                            print('\nPlease enter buffer in the format #.##\n')
                 b = True
             else:
                 print('\nInvalid input. Please enter "y" or "n".')
             if b:
                 break
         except ValueError as e:
-            print(f'\nProduction forecast ValueError: {e}. Please add to `Issues` page.')
+            print(f'\nProduction buffer ValueError: {e}. Please add to `Issues` page.')
                                      
-    wait_time = int(input('Enter step wait time (sec; at least 3 is recommended)----->'))
+    wait_time = int(input('Enter step wait time (sec; >1)----->'))
     
     print('\nProcessing...\n')
     time.sleep(wait_time)
@@ -260,19 +274,44 @@ while not q:
 
 # navigating to courier report
     for step in courier_navigation:
-        
-        if step == '/html/body/div[3]/div/div/div/div/div[1]/table/tbody/tr[1]/td[2]/a':
-            button = driver.find_element(By.XPATH, step)
-            button.click()
-            time.sleep(wait_time+3)
-            tabs = driver.window_handles
-            driver.switch_to.window(tabs[-1])
-            del password
-            del username
+        button = driver.find_element(By.XPATH, step)
+        button.click()
+        time.sleep(wait_time)
+    
+    tbody_xpath = '/html/body/div[3]/div/div/div/div/div[1]/table/tbody'
+    rows = driver.find_elements(By.XPATH, f'{tbody_xpath}/tr')
+    for row_index, row in enumerate(rows, start=1):
+        row_text = ""
+        for attempt in range(3):
+            try:
+                row_text = row.text
+                if row_text:
+                    break
+            except Exception as e:
+                print(f"Attempt {attempt + 1}: Failed to get text for row {row_index} - {e}")
+                time.sleep(1)
+        if row_text:
+            row_list = row_text.split()
+            try:
+                if row_list and row_list[0].isdigit():
+                    round_num_attempt = int(row_list[0])
+                    if round_num_attempt == round_num:
+                        button_xpath = f'{tbody_xpath}/tr[{row_index}]/td[2]/a'
+                        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, button_xpath)))
+                        button = driver.find_element(By.XPATH, button_xpath)
+                        button.click()
+                        time.sleep(wait_time + 2)
+                        tabs = driver.window_handles
+                        driver.switch_to.window(tabs[-1])
+                        del password
+                        del username
+                        break
+            except ValueError:
+                print(f"Row {row_index} does not start with a number: {row_text}")
+            except NoSuchElementException:
+                print(f"Button not found for row {row_index}.")
         else:
-            button = driver.find_element(By.XPATH, step)
-            button.click()
-            time.sleep(wait_time)
+            print(f"No text found for row {row_index} after multiple attempts.")
 
 # inputting market size
     for i in range(0, 5):
