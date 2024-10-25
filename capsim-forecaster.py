@@ -24,7 +24,7 @@ courier_navigation = ['/html/body/div[2]/div/div/main/div[1]/form/div[3]/button'
                       '/html/body/div[1]/div/main/div/div/div[5]/a',
                       '/html/body/nav/div/div[2]/ul/li[4]/a',
                       '/html/body/nav/div/div[2]/ul/li[4]/ul/li[2]/a',
-                      '/html/body/div[3]/div/div/div/div/div[1]/table/tbody/tr/td[2]/a'
+                      '/html/body/div[3]/div/div/div/div/div[1]/table/tbody/tr[1]/td[2]/a'
                       ]
 
 # dataframe set up
@@ -36,7 +36,7 @@ df = pd.DataFrame({'market':['traditional', 'low-end', 'high-end', 'performance'
                    'segment-satisfaction':[0, 0, 0, 0, 0],
                    'units-sold':[0, 0, 0, 0, 0],
                    'leftover-inventory': [0, 0, 0, 0, 0],
-                   'production-margin': [None, None, None, None, None],
+                   'production-buffer': [None, None, None, None, None],
                    'm-basic-growth': [0.0, 0.0, 0.0, 0.0, 0.0],
                    'p-basic-growth': [0.0, 0.0, 0.0, 0.0, 0.0],
                    'm-potential-model': [0.0, 0.0, 0.0, 0.0, 0.0],
@@ -83,9 +83,9 @@ def find_potential_market_share(num):
             product_td = row.find_element(By.XPATH, 'td[1]')
             product = product_td.text
             if product.lower() == target_product:
-                value_td = row.find_element(By.XPATH, f'td[{num + 2}]')
+                value_td = row.find_element(By.XPATH, f'td[{num+2}]')
                 value = value_td.text
-                potential_market_share = float(value.replace('%', '').replace('.', '').replace(' ', ''))*0.001
+                potential_market_share = float(value.strip().replace('%', ''))/100
                 return potential_market_share
     except Exception as e:
         print(f'Error processing potential market share for {target_product}: {e}')
@@ -197,27 +197,50 @@ while not q:
             break
         products.append(product_temp)
 
-    y_n = str(input('All production forecast margins the same? [y/n]----------->')).lower()
-    quitter(y_n)
-    if q:
-        break
-    if y_n == 'y' or y_n == 'yes':
-        production_margin = float(input('Enter production margin----------------------------------->'))
-        quitter(production_margin)
-        if q:
-            break
-        df[['production-margin']] = production_margin
-    elif y_n == 'n' or y_n == 'no':
-        market_num = 0
-        for market in df['market']:
-            production_margin_temp = float(input(f'Enter {market} production margin: '))
-            quitter(production_margin_temp)
+    # Initialize b and q
+    b = False
+    q = False
+    
+    while True:
+        try:
+            y_n = str(input('All production forecast margins the same? [y/n]----------->')).lower()
+            quitter(y_n)
             if q:
                 break
-            df.iloc[market_num, 8] = production_margin_temp
-            market_num += 1
+            if y_n == 'y' or y_n == 'yes':
+                while True:
+                    try:
+                        production_buffer = float(input('Enter production margin----------------------------------->'))
+                        quitter(production_buffer)
+                        if q:
+                            break
+                        df[['production-buffer']] = production_buffer
+                        b = True
+                        break
+                    except ValueError:
+                        print('\nPlease enter forecast in the format #.##\n')
+            elif y_n == 'n' or y_n == 'no':
+                market_num = 0
+                for market in df['market']:
+                    while True:
+                        try:
+                            production_buffer_temp = float(input(f'Enter {market} production margin: '))
+                            quitter(production_buffer_temp)
+                            if q:
+                                break
+                            df.iloc[market_num, 8] = production_buffer_temp
+                            market_num += 1
+                        except ValueError:
+                            print('\nPlease enter forecast in the format #.##\n')
+                b = True
+            else:
+                print('\nInvalid input. Please enter "y" or "n".')
+            if b:
+                break
+        except ValueError as e:
+            print(f'\nProduction forecast ValueError: {e}. Please add to `Issues` page.')
                                      
-    wait_time = int(input('Enter step wait time (sec; at least 3 is recommended):---->'))
+    wait_time = int(input('Enter step wait time (sec; at least 3 is recommended)----->'))
     
     print('\nProcessing...\n')
     time.sleep(wait_time)
@@ -238,7 +261,7 @@ while not q:
 # navigating to courier report
     for step in courier_navigation:
         
-        if step == '/html/body/div[3]/div/div/div/div/div[1]/table/tbody/tr/td[2]/a':
+        if step == '/html/body/div[3]/div/div/div/div/div[1]/table/tbody/tr[1]/td[2]/a':
             button = driver.find_element(By.XPATH, step)
             button.click()
             time.sleep(wait_time+3)
@@ -279,21 +302,30 @@ while not q:
     for i in range(0, 5):
         df.iloc[i, 7] = find_leftover_inventory(i)
     
+    units_sold = df['units-sold']
+    demand_growth_rate = df['demand-growth-rate']
+    production_buffer = df['production-buffer']
+    potential_market_share = df['potential-market-share']
+    leftover_inventory = df['leftover-inventory']
+    market_size = df['market-size']
+    product_satisfaction = df['product-satisfaction']
+    segment_satisfaction = df['segment-satisfaction']
+    
 # calculating basic growth forecasts
-    df['m-basic-growth'] = (df['units-sold']*(1+df['demand-growth-rate'])-df['leftover-inventory'])*0.9
-    df['p-basic-growth'] = (df['units-sold']*(1+df['demand-growth-rate'])-df['leftover-inventory'])*df['production-margin']
+    df['m-basic-growth'] = units_sold * (1 + demand_growth_rate) * 0.9
+    df['p-basic-growth'] = units_sold * demand_growth_rate * production_buffer
 
 # calculating potential market share forecasts
-    df['m-potential-model'] = (df['market-size']*(1+df['demand-growth-rate'])*df['potential-market-share']-df['leftover-inventory'])*0.9
-    df['p-potential-model'] = (df['market-size']*(1+df['demand-growth-rate'])*df['potential-market-share']-df['leftover-inventory'])*df['production-margin']
+    df['m-potential-model'] = market_size * (1 + demand_growth_rate) * potential_market_share * 0.9
+    df['p-potential-model'] = market_size * (1 + demand_growth_rate) * potential_market_share * production_buffer
 
 # calculating satisfaction score share forecasts
-    df['m-satisfaction-model'] = (df['market-size']*(1+df['demand-growth-rate'])*(df['product-satisfaction']/df['segment-satisfaction'])-df['leftover-inventory'])*0.9
-    df['p-satisfaction-model'] = (df['market-size']*(1+df['demand-growth-rate'])*(df['product-satisfaction']/df['segment-satisfaction'])-df['leftover-inventory'])*df['production-margin']
+    df['m-satisfaction-model'] = market_size * (1 + demand_growth_rate) * (product_satisfaction / segment_satisfaction) * 0.9
+    df['p-satisfaction-model'] = market_size * (1 + demand_growth_rate) * (product_satisfaction / segment_satisfaction) * production_buffer
 
 # calculating averaged forecasts
-    df['marketing-forecast'] = (df['m-basic-growth']+df['m-potential-model']+df['m-satisfaction-model'])/3
-    df['production-forecast'] = (df['p-basic-growth']+df['p-potential-model']+df['p-satisfaction-model'])/3
+    df['marketing-forecast'] = (df['m-basic-growth'] + df['m-potential-model'] + df['m-satisfaction-model']) / 3
+    df['production-forecast'] = (df['p-basic-growth'] + df['p-potential-model'] + df['p-satisfaction-model']) / 3 - leftover_inventory
 
 # print market name and forecasts
     print(df[['market', 'marketing-forecast', 'production-forecast']])
@@ -301,11 +333,16 @@ while not q:
 # querying system with query counter
     query_count = 1
     while True:
-        query = str(input(f"\nEnter query, one of: \n\n{(', '.join(df.columns[1:])).replace('-', ' ')}, or quit to quit.\n\nQuery[{query_count}]: "))
+        query = str(input(f"\nEnter query, one of: \n\n{(', '.join(df.columns[1:])).replace('-', ' ')}, or quit to quit.\n\nQuery[{query_count}]: ")).lower().replace(' ', '-')
         quitter(query)
         if q:
             break
-        if query:
-            query_count += 1
-            print('\n', df[['market', f"{query.replace(' ', '-')}"]])
+        while query:
+            if query not in df.columns or query == 'market':
+                print('\nQuery request invalid.')
+                query = False
+            else:
+                query_count += 1
+                print('\n', df[['market', f'{query}']])
+                query = False
 
