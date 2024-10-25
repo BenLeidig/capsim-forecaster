@@ -12,8 +12,8 @@ If you like this project, a star would be greatly appreciated! If you experience
 ## Cheating
 At the time of this program's creation, its use does not constitute cheating in accordance with the UIUC BUS 201 FA24 course syllabus. However, what constitutes cheating may vary by university, college, course, semester, and professor. **I am not responsible for any accusations or charges of cheating; users of this program are at their own discretion for the ethics of its use.**
 
-## Directions For Use:
-### Programming Environment Set Up:
+## Directions For Use
+### Programming Environment Set Up
 Many of the directions in this step (particularly *Python*, *Pip*, and *Development Environment*) are standard/vital in ny programming workflow.
 
 #### Python
