@@ -14,7 +14,7 @@ At the time of this program's creation, its use does not constitute cheating by 
 
 ## Directions For Use:
 ### Programming Environment Set Up:
-Many of the directions in this step (particularly *Python*, *Pip*, and *Development Environemnt*) are standard/vital in ny programming workflow.
+Many of the directions in this step (particularly *Python*, *Pip*, and *Development Environment*) are standard/vital in ny programming workflow.
 
 #### Python
 Visit https://wiki.python.org/moin/BeginnersGuide/Download for Python installation instructions.
