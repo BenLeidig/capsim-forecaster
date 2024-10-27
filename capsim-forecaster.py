@@ -124,15 +124,15 @@ def find_segment_satisfaction(num):
 
 def find_units_sold(num):
     try:
-        tbody_xpath = '/html/body/div[1]/div/div/div/div[4]/div/div[1]/div[3]/div/table/tbody'
-        rows = driver.find_elements(By.XPATH, f'{tbody_xpath}/tr')
-        target_product = products[num]
+        tr_xpath = f'/html/body/div[1]/div/div/div/div[{num}]/div/div[1]/div[2]/div[3]/table/tbody/tr'
+        rows = driver.find_elements(By.XPATH, tr_xpath)
+        target_product = products[num-5]
         for row in rows:
             product_td = row.find_element(By.XPATH, 'td[1]')
-            product = product_td.text.replace(',', '').replace(' ', '')
+            product = product_td.text
             if product.lower() == target_product:
                 value_td = row.find_element(By.XPATH, 'td[3]')
-                units_sold = value_td.text.replace(',', '').replace(' ', '')
+                units_sold = value_td.text.replace(' ', '').replace(',', '')
                 return int(units_sold)
     except Exception as e:
         print(f'Error processing units sold for {target_product}: {e}')
@@ -335,7 +335,7 @@ while not q:
     
 # inputting units sold
     for i in range(0, 5):
-        df.iloc[i, 6] = find_units_sold(i)
+        df.iloc[i, 6] = find_units_sold(i+5)
 
 # inputting leftover inventory
     for i in range(0, 5):
@@ -352,15 +352,15 @@ while not q:
     
 # calculating basic growth forecasts
     df['m-basic-growth'] = units_sold * (1 + demand_growth_rate) * 0.9
-    df['p-basic-growth'] = units_sold * demand_growth_rate * production_buffer
+    df['p-basic-growth'] = units_sold * (1 + demand_growth_rate) * (1 + production_buffer)
 
 # calculating potential market share forecasts
     df['m-potential-model'] = market_size * (1 + demand_growth_rate) * potential_market_share * 0.9
-    df['p-potential-model'] = market_size * (1 + demand_growth_rate) * potential_market_share * production_buffer
+    df['p-potential-model'] = market_size * (1 + demand_growth_rate) * potential_market_share * (1 + production_buffer)
 
 # calculating satisfaction score share forecasts
     df['m-satisfaction-model'] = market_size * (1 + demand_growth_rate) * (product_satisfaction / segment_satisfaction) * 0.9
-    df['p-satisfaction-model'] = market_size * (1 + demand_growth_rate) * (product_satisfaction / segment_satisfaction) * production_buffer
+    df['p-satisfaction-model'] = market_size * (1 + demand_growth_rate) * (product_satisfaction / segment_satisfaction) * (1 + production_buffer)
 
 # calculating averaged forecasts
     df['marketing-forecast'] = (df['m-basic-growth'] + df['m-potential-model'] + df['m-satisfaction-model']) / 3
