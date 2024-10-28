@@ -15,9 +15,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.support import expected_conditions as EC
 
 # creating empty lists
 products = []
@@ -298,40 +296,31 @@ while not q:
         button.click()
         time.sleep(wait_time)
     
+    del username
+    del password
+    
     tbody_xpath = '/html/body/div[3]/div/div/div/div/div[1]/table/tbody'
     rows = driver.find_elements(By.XPATH, f'{tbody_xpath}/tr')
     for row_index, row in enumerate(rows, start=1):
-        row_text = ""
-        for attempt in range(3):
-            try:
-                row_text = row.text
-                if row_text:
-                    break
-            except Exception as e:
-                print(f"Attempt {attempt + 1}: Failed to get text for row {row_index} - {e}")
-                time.sleep(1)
+        row_text = row.text
         if row_text:
             row_list = row_text.split()
             try:
-                if row_list and row_list[0].isdigit():
-                    round_num_attempt = int(row_list[0])
-                    if round_num_attempt == round_num:
-                        button_xpath = f'{tbody_xpath}/tr[{row_index}]/td[2]/a'
-                        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, button_xpath)))
-                        button = driver.find_element(By.XPATH, button_xpath)
-                        button.click()
-                        time.sleep(wait_time + 2)
-                        tabs = driver.window_handles
-                        driver.switch_to.window(tabs[-1])
-                        del password
-                        del username
-                        break
+                round_num_attempt = int(row_list[0])
+                if round_num_attempt == round_num:
+                    button_xpath = f'{tbody_xpath}/tr[{row_index}]/td[2]/a'
+                    button = driver.find_element(By.XPATH, button_xpath)
+                    button.click()
+                    time.sleep(wait_time+2)
+                    tabs = driver.window_handles
+                    driver.switch_to.window(tabs[-1])
+                    break
             except ValueError:
-                print(f"Row {row_index} does not start with a number: {row_text}")
+                print(f'Row {row_index} does not start with a number: {row_text}')
             except NoSuchElementException:
-                print(f"Button not found for row {row_index}.")
+                print(f'Button not found for row {row_index}.')
         else:
-            print(f"No text found for row {row_index} after multiple attempts.")
+            print(f'No text found for row {row_index} after multiple attempts.')
 
 # inputting market size
     for i in range(0, 5):
