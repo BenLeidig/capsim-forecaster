@@ -22,6 +22,23 @@ from selenium.webdriver.support import expected_conditions as EC
 # creating empty lists
 products = []
 
+# prompt list for standardizing prompt UI
+prompts = [
+           'Enter Chrome driver path',
+           'Enter browser path',
+           'Enter username',
+           'Enter password',
+           'Enter round number',
+           "Are all markets' forecast buffers the same? [y/n]",
+           'Enter production buffer',
+           'Enter step wait time (sec; >1)'
+           ]
+
+prompts_iterables = [
+                     'Enter  product name',
+                     'Enter  production buffer'
+                     ]
+
 # navigation steps
 courier_navigation = ['/html/body/div[2]/div/div/main/div[1]/form/div[3]/button',
                       '/html/body/div[1]/div/main/div/div/div[5]/a',
@@ -162,39 +179,41 @@ file_path = py_file_path.replace(f'{Path(__file__).name}', '')
 driver_attempt = os.path.join(file_path, 'chrome-driver-path.txt')
 if not os.path.exists(driver_attempt) or os.path.getsize(driver_attempt) == 0:
     with open(driver_attempt, 'w') as file:
-        chrome_driver_path = input('Enter Chrome driver path---------------------------------->')
+        chrome_driver_path = input(prompts[0]+'-'*(53-len(prompts[0]))+'>')
         file.write(chrome_driver_path)
 else:
     with open(driver_attempt, 'r') as file:
         chrome_driver_path = file.read()
+        print(f'\nChrome driver path found: {chrome_driver_path}')
 
 # Attempt to retrieve browser path
 ## If unable, write new file `browser-path.txt`
 browser_attempt = os.path.join(file_path, 'browser-path.txt')
 if not os.path.exists(browser_attempt) or os.path.getsize(browser_attempt) == 0:
     with open(browser_attempt, 'w') as file:
-        browser_path = input('Enter browser path---------------------------------------->')
+        browser_path = input(prompts[1]+'-'*(53-len(prompts[1]))+'>')
         file.write(browser_path)
 else:
     with open(browser_attempt, 'r') as file:
         browser_path = file.read()
+        print(f'\nBrowser path found: {browser_path}\n')
 
 while not q:
 
 # inputs
-    username = str(input('Enter username-------------------------------------------->'))
+    username = str(input(prompts[2]+'-'*(53-len(prompts[2]))+'>'))
     quitter(username)
     if q:
         break
 
-    password = str(input('Enter password-------------------------------------------->'))
+    password = str(input(prompts[3]+'-'*(53-len(prompts[3]))+'>'))
     quitter(password)
     if q:
         break
     
     while True:
         try:
-            round_num_temp = input('Enter round number: ')
+            round_num_temp = input(prompts[4]+'-'*(53-len(prompts[4]))+'>')
             quitter(round_num_temp)
             if q:
                 break
@@ -205,7 +224,7 @@ while not q:
             print('\nInvalid input. Please enter round number as an integer.\n')
     
     for market in df['market']:
-        product_temp = str(input(f'Enter {market} product name: ')).lower()
+        product_temp = str(input(f'Enter {market} product name'+'-'*(53-len(prompts_iterables[0])-len(market))+'>')).lower()
         quitter(product_temp)
         if q:
             break
@@ -217,14 +236,14 @@ while not q:
     
     while True:
         try:
-            y_n = str(input("Are all markets' forecast buffers the same? [y/n]----->")).lower()
+            y_n = str(input(prompts[5]+'-'*(53-len(prompts[5]))+'>')).lower()
             quitter(y_n)
             if q:
                 break
             if y_n == 'y' or y_n == 'yes':
                 while True:
                     try:
-                        production_buffer = float(input('Enter production buffer---------------------------------->'))
+                        production_buffer = float(input(prompts[6]+'-'*(53-len(prompts[6]))+'>'))
                         quitter(production_buffer)
                         if q:
                             break
@@ -238,12 +257,13 @@ while not q:
                 for market in df['market']:
                     while True:
                         try:
-                            production_buffer_temp = float(input(f'Enter {market} production buffer: '))
+                            production_buffer_temp = float(input(f'Enter {market} production buffer'+'-'*(53-len(prompts_iterables[1])-len(market))+'>'))
                             quitter(production_buffer_temp)
                             if q:
                                 break
                             df.iloc[market_num, 8] = production_buffer_temp
                             market_num += 1
+                            break
                         except ValueError:
                             print('\nPlease enter buffer in the format #.##\n')
                 b = True
@@ -254,7 +274,7 @@ while not q:
         except ValueError as e:
             print(f'\nProduction buffer ValueError: {e}. Please add to `Issues` page.')
                                      
-    wait_time = int(input('Enter step wait time (sec; >1)----->'))
+    wait_time = int(input(prompts[7]+'-'*(53-len(prompts[7]))+'>'))
     
     print('\nProcessing...\n')
     time.sleep(wait_time)
